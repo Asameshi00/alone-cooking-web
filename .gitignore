@@ -1,0 +1,26 @@
+### env ###
+.env
+.env.*
+!.env.example
+*/.env
+*/.env.*
+!*/.env.example
+
+### Frontend (CRA / Node) ###
+cooking-web-frontend/node_modules/
+cooking-web-frontend/build/
+cooking-web-frontend/.cache/
+
+### Backend (Python / uv) ###
+cooking-web-backend/.venv/
+cooking-web-backend/__pycache__/
+cooking-web-backend/**/*.pyc
+cooking-web-backend/.pytest_cache/
+cooking-web-backend/.ruff_cache/
+cooking-web-backend/.mypy_cache/
+cooking-web-backend/app.db
+
+### OS / Editor ###
+.DS_Store
+.idea/
+.vscode/
