@@ -1,3 +1,7 @@
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 import httpx
 
 from app.core.config import get_settings
@@ -6,10 +10,12 @@ from app.schemas.recipe import RecipeSearchResponse
 RAKUTEN_SEARCH_URL = "https://app.rakuten.co.jp/services/api/Recipe/CategoryRanking/20170426"
 
 
+# 楽天レシピAPIを使用してレシピを検索するサービス
 class RakutenRecipeService:
     def __init__(self) -> None:
         self.settings = get_settings()
 
+    # 楽天レシピAPIを使用してレシピをlimit件数分検索する
     async def search(self, ingredient: str, limit: int = 10) -> list[RecipeSearchResponse]:
         if not self.settings.rakuten_app_id:
             return self._fallback(ingredient, limit)
@@ -22,6 +28,7 @@ class RakutenRecipeService:
         if self.settings.rakuten_affiliate_id:
             params["affiliateId"] = self.settings.rakuten_affiliate_id
 
+        # 楽天レシピAPIを使用してレシピを検索する
         async with httpx.AsyncClient(timeout=15.0) as client:
             response = await client.get(RAKUTEN_SEARCH_URL, params=params)
             response.raise_for_status()

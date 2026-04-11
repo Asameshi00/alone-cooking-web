@@ -1,3 +1,8 @@
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+""" __init__.py """
+
 from app.api.ai import router as ai_router
 from app.api.favorites import router as favorites_router
 from app.api.health import router as health_router

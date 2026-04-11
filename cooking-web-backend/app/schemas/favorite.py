@@ -1,10 +1,12 @@
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 from datetime import datetime
-
 from pydantic import BaseModel, Field
-
 from app.schemas.common import ORMBase
 
-
+# お気に入りレシピを作成するリクエスト
 class FavoriteCreate(BaseModel):
     user_id: int = Field(..., ge=1)
     recipe_id: str = Field(..., min_length=1, max_length=50)
@@ -12,7 +14,7 @@ class FavoriteCreate(BaseModel):
     recipe_url: str = Field(..., min_length=1, max_length=500)
     recipe_image_url: str | None = Field(default=None, max_length=500)
 
-
+# お気に入りレシピを取得するレスポンス
 class FavoriteResponse(ORMBase):
     id: int
     user_id: int

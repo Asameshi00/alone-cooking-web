@@ -1,3 +1,7 @@
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -5,7 +9,7 @@ from app.db.base import Base
 from app.db.session import engine
 from app.models import User
 
-
+# データベースを初期化する
 async def init_db() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
