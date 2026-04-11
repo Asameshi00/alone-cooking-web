@@ -1,3 +1,6 @@
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from fastapi import APIRouter
 
 from app.schemas.ai import AISuggestionRequest, AISuggestionResponse
