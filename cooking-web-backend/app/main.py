@@ -1,3 +1,7 @@
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI

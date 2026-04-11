@@ -1,3 +1,7 @@
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 from datetime import datetime
 
 from sqlalchemy import DateTime, String
@@ -5,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-
+# ユーザーモデル
 class User(Base):
     __tablename__ = "users"
 

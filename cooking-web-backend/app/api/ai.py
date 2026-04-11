@@ -6,7 +6,7 @@ from app.services.ai import AIRecipeService
 router = APIRouter(prefix="/ai", tags=["ai"])
 service = AIRecipeService()
 
-
+# AIによるレシピ提案を行うエンドポイント
 @router.post("/suggest", response_model=AISuggestionResponse)
 async def suggest_recipe(payload: AISuggestionRequest) -> AISuggestionResponse:
     return await service.suggest(payload)

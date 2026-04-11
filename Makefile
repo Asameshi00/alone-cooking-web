@@ -13,7 +13,8 @@ help:
 	@echo "  install          : フロント/バックエンドの依存関係をインストール"
 	@echo "  install-frontend : フロントエンド依存をインストール"
 	@echo "  install-backend  : バックエンド依存をインストール(uv sync)"
-	@echo "  clean            : フロントの依存関係をクリーンアップ"
+	@echo "  clean-frontend   : フロントの依存関係をクリーンアップ"
+	@echo "  clean-backend    : バックエンドのキャッシュをクリーンアップ"
 	@echo "  list             : フロントエンド依存を表示"
 	@echo "  check-old        : フロントの古い依存を表示"
 	@echo "  check-unused     : フロントの未使用依存を表示"
@@ -29,7 +30,7 @@ run:
 .PHONY: run-frontend
 run-frontend:
 	@echo "=== フロントエンドを起動 ==="
-	cd $(FRONTEND_DIR) && npm run dev
+	cd $(FRONTEND_DIR) && npm start
 
 .PHONY: run-backend
 run-backend:
@@ -78,10 +79,25 @@ uninstall:
 		echo "Package名を指定してください: make uninstall <package>"; \
 	fi
 
-.PHONY: clean
-clean:
+.PHONY: clean-frontend
+clean-frontend:
 	@echo "=== フロントエンド依存をクリーンアップ ==="
 	cd $(FRONTEND_DIR) && npm prune && npm cache clean --force
+	@echo "Clean complete."
+
+.PHONY: clean-backend
+clean-backend:
+	@echo "=== バックエンド依存をクリーンアップ ==="
+	cd $(BACKEND_DIR) && uv clean
+	cd $(BACKEND_DIR) && rm -rf __pycache__
+	cd $(BACKEND_DIR) && rm -rf app/__pycache__
+	cd $(BACKEND_DIR) && rm -rf app/models/__pycache__
+	cd $(BACKEND_DIR) && rm -rf app/schemas/__pycache__
+	cd $(BACKEND_DIR) && rm -rf app/services/__pycache__
+	cd $(BACKEND_DIR) && rm -rf app/core/__pycache__
+	cd $(BACKEND_DIR) && rm -rf app/db/__pycache__
+	cd $(BACKEND_DIR) && rm -rf app/api/__pycache__
+	cd $(BACKEND_DIR) && rm -rf app/main.pyc
 	@echo "Clean complete."
 
 .PHONY: lint

@@ -1,3 +1,7 @@
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +12,7 @@ from app.schemas.inventory import InventoryCreate, InventoryResponse
 
 router = APIRouter(prefix="/inventory", tags=["inventory"])
 
-
+# 在庫を取得するエンドポイント
 @router.get("", response_model=list[InventoryResponse])
 async def list_inventory(
     user_id: int = Query(..., ge=1),
@@ -19,6 +23,7 @@ async def list_inventory(
     return [InventoryResponse.model_validate(row) for row in rows]
 
 
+# 在庫を作成するエンドポイント
 @router.post("", response_model=InventoryResponse)
 async def create_inventory(
     payload: InventoryCreate,
