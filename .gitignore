@@ -24,3 +24,4 @@ cooking-web-backend/app.db
 .DS_Store
 .idea/
 .vscode/
+.claude/

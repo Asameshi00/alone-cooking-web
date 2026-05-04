@@ -7,7 +7,7 @@ from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import db_session_dep
-from app.models.favorite import FavoriteRecipe
+from app.models.favorite_model import FavoriteRecipe
 from app.schemas.favorite import FavoriteCreate, FavoriteResponse
 
 router = APIRouter(prefix="/favorites", tags=["favorites"])

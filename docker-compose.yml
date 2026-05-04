@@ -17,7 +17,7 @@ services:
       retries: 5
   backend:
     build:
-      context: ../cooking-web-backend
+      context: ./cooking-web-backend
       dockerfile: Dockerfile
     container_name: cooking-web-backend
     ports:
@@ -30,10 +30,10 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ../cooking-web-backend/app:/app/app:ro
+      - ./cooking-web-backend/app:/app/app:ro
   frontend:
     build:
-      context: ../cooking-web-frontend
+      context: ./cooking-web-frontend
       dockerfile: Dockerfile
     container_name: cooking-web-frontend
     ports:
@@ -45,7 +45,7 @@ services:
     depends_on:
       - backend
     volumes:
-      - ../cooking-web-frontend/src:/app/src
-      - ../cooking-web-frontend/public:/app/public
+      - ./cooking-web-frontend/src:/app/src
+      - ./cooking-web-frontend/public:/app/public
 volumes:
   pgdata: {}
