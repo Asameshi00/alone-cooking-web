@@ -13,20 +13,22 @@ RAKUTEN_SEARCH_URL = "https://app.rakuten.co.jp/services/api/Recipe/CategoryRank
 # 楽天レシピAPIを使用してレシピを検索するサービス
 class RakutenRecipeService:
     def __init__(self) -> None:
+        # 設定を取得する
         self.settings = get_settings()
 
     # 楽天レシピAPIを使用してレシピをlimit件数分検索する
-    async def search(self, ingredient: str, limit: int = 10) -> list[RecipeSearchResponse]:
-        if not self.settings.rakuten_app_id:
+    async def search_recipes_with_ingredient(self, ingredient: str, limit: int = 10) -> list[RecipeSearchResponse]:
+        if not self.settings.RAKUTEN_APP_ID:
             return self._fallback(ingredient, limit)
 
+        # パラメータを作成する
         params = {
-            "applicationId": self.settings.rakuten_app_id,
-            "categoryId": self.settings.rakuten_category_id,
+            "applicationId": self.settings.RAKUTEN_APP_ID,
+            "categoryId": self.settings.RAKUTEN_CATEGORY_ID,
             "format": "json",
         }
-        if self.settings.rakuten_affiliate_id:
-            params["affiliateId"] = self.settings.rakuten_affiliate_id
+        if self.settings.RAKUTEN_AFFILIATE_ID:
+            params["affiliateId"] = self.settings.RAKUTEN_AFFILIATE_ID
 
         # 楽天レシピAPIを使用してレシピを検索する
         async with httpx.AsyncClient(timeout=15.0) as client:
