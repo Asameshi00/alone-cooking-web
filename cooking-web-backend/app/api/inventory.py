@@ -7,7 +7,7 @@ from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import db_session_dep
-from app.models.inventory import InventoryItem
+from app.models.inventory_model import InventoryItem
 from app.schemas.inventory import InventoryCreate, InventoryResponse
 
 router = APIRouter(prefix="/inventory", tags=["inventory"])

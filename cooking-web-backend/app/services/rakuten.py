@@ -7,8 +7,6 @@ import httpx
 from app.core.config import get_settings
 from app.schemas.recipe import RecipeSearchResponse
 
-RAKUTEN_SEARCH_URL = "https://app.rakuten.co.jp/services/api/Recipe/CategoryRanking/20170426"
-
 
 # 楽天レシピAPIを使用してレシピを検索するサービス
 class RakutenRecipeService:
@@ -16,23 +14,35 @@ class RakutenRecipeService:
         # 設定を取得する
         self.settings = get_settings()
 
-    # 楽天レシピAPIを使用してレシピをlimit件数分検索する
-    async def search_recipes_with_ingredient(self, ingredient: str, limit: int = 10) -> list[RecipeSearchResponse]:
-        if not self.settings.RAKUTEN_APP_ID:
-            return self._fallback(ingredient, limit)
 
-        # パラメータを作成する
+    # パラメータを作成する
+    def build_params(self) -> dict:
         params = {
-            "applicationId": self.settings.RAKUTEN_APP_ID,
-            "categoryId": self.settings.RAKUTEN_CATEGORY_ID,
+            "applicationId": self.settings.rakuten_app_id,
+            "categoryId": self.settings.rakuten_category_id,
             "format": "json",
         }
-        if self.settings.RAKUTEN_AFFILIATE_ID:
-            params["affiliateId"] = self.settings.RAKUTEN_AFFILIATE_ID
+        return params
+
+
+    # 楽天レシピAPIを使用してレシピをlimit件数分検索する
+    async def search(
+        self,
+        ingredient: str,
+        limit: int = 10
+    ) -> list[RecipeSearchResponse]:
+        if not self.settings.rakuten_app_id:
+            return []
+
+        # パラメータを作成する
+        params = self.build_params()
+
+        if self.settings.rakuten_affiliate_id:
+            params["affiliateId"] = self.settings.rakuten_affiliate_id
 
         # 楽天レシピAPIを使用してレシピを検索する
         async with httpx.AsyncClient(timeout=15.0) as client:
-            response = await client.get(RAKUTEN_SEARCH_URL, params=params)
+            response = await client.get(self.settings.rakuten_url, params=params)
             response.raise_for_status()
             payload = response.json()
 
@@ -51,16 +61,3 @@ class RakutenRecipeService:
             )
         return [r for r in result if ingredient in "".join([r.title, r.description, " ".join(r.materials)])] or result
 
-    def _fallback(self, ingredient: str, limit: int) -> list[RecipeSearchResponse]:
-        demo = [
-            RecipeSearchResponse(
-                recipe_id=f"local-{i}",
-                title=f"{ingredient}の簡単レシピ {i + 1}",
-                description=f"{ingredient}を使った時短メニューです。",
-                url="https://example.com/recipe",
-                image_url=None,
-                materials=[ingredient, "塩", "こしょう"],
-            )
-            for i in range(limit)
-        ]
-        return demo

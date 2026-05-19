@@ -24,8 +24,6 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://cooking:cooking@db:5432/cooking
-      # list 型は JSON 配列が安全（カンマ区切りだと pydantic-settings で落ちやすい）
-      ALLOWED_ORIGINS: '["http://localhost:3000","http://127.0.0.1:3000"]'
     depends_on:
       db:
         condition: service_healthy
@@ -47,5 +45,15 @@ services:
     volumes:
       - ./cooking-web-frontend/src:/app/src
       - ./cooking-web-frontend/public:/app/public
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: cooking-web-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
 volumes:
   pgdata: {}
