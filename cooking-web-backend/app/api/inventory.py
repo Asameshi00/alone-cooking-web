@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -34,3 +34,16 @@ async def create_inventory(
     await session.commit()
     await session.refresh(item)
     return InventoryResponse.model_validate(item)
+
+
+# 在庫を削除するエンドポイント
+@router.delete("/{item_id}", status_code=204)
+async def delete_inventory(
+    item_id: int,
+    session: AsyncSession = Depends(db_session_dep),
+) -> None:
+    item = await session.get(InventoryItem, item_id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="指定された在庫が見つかりません")
+    await session.delete(item)
+    await session.commit()

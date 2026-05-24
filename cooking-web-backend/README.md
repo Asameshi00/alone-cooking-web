@@ -54,13 +54,13 @@ cooking-web-backend
    - GET method: ヘルスチェック
 - `GET /api/v1/recipes/search?ingredient=卵&limit=10`
    - GET method: 食材をもとにレシピ検索
-- `POST /api/v1/ai/suggest`
-   - POST method: AIによるレシピの提案
+- `GET /api/v1/recipes/favorites`
+   - GET method: お気に入りレシピを取得する
+- `POST /api/v1/recipes/favorites`
+   - POST method: お気に入りのレシピを作成する
 - `GET /api/v1/inventory`
    - GET method: 在庫を取得する
 - `POST /api/v1/inventory`
    - POST method: 在庫を作成する
-- `GET /api/v1/favorites`
-   - GET method: お気に入りレシピを取得する
-- `POST /api/v1/favorites`
-   - POST method: お気に入りのレシピを作成する
+- `DELETE /api/v1/inventory`
+   - DELETE method: 在庫を削除する

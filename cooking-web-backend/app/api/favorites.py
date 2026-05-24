@@ -10,7 +10,7 @@ from app.api.deps import db_session_dep
 from app.models.favorite_model import FavoriteRecipe
 from app.schemas.favorite import FavoriteCreate, FavoriteResponse
 
-router = APIRouter(prefix="/favorites", tags=["favorites"])
+router = APIRouter(prefix="/recipes/favorites", tags=["favorites"])
 
 # お気に入りレシピを取得する
 @router.get("", response_model=list[FavoriteResponse])

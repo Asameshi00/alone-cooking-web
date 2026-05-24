@@ -7,8 +7,15 @@ from functools import lru_cache
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# 設定ファイル
+
 class Settings(BaseSettings):
+    """
+    設定クラス
+
+    Args:
+        BaseSettings (_type_): 基底クラス
+    """
+    
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     app_name: str = "Cooking Web Backend" # アプリケーション名
@@ -21,8 +28,6 @@ class Settings(BaseSettings):
 
     rakuten_app_id: str | None = None # 楽天レシピAPIのアプリID
     rakuten_affiliate_id: str | None = None # 楽天レシピAPIのアフィリエイトID
-    rakuten_category_id: str = "14-121" # 楽天レシピAPIのカテゴリID
-    rakuten_url: str = "https://app.rakuten.co.jp/services/api/Recipe/CategoryRanking/20170426"
 
     youtube_api_key: str | None = None # YouTube Data API キー
 
