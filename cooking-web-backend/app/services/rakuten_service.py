@@ -13,23 +13,90 @@ CATEGORY_RANKING_URL = "https://app.rakuten.co.jp/services/api/Recipe/CategoryRa
 
 
 class RakutenRecipeService:
-    _category_df: pd.DataFrame | None = None  # 起動後に一度だけ取得するクラスレベルキャッシュ
+    _category_df: pd.DataFrame | None = None # 起動後に一度だけ取得するクラスレベルキャッシュ
 
     def __init__(self) -> None:
         """ コンストラクタ """
-        self.logger = get_logger(__name__)
-        self.settings = get_settings()
+        self.logger = get_logger(__name__) # ログを取得する
+        self.settings = get_settings() # 設定を取得する
 
-
-    def build_category_df(self, json_data: dict) -> pd.DataFrame:
+    async def search_for_recipes(self, ingredient: str, limit: int = 10) -> list[RakutenRecipeSearchResponse]:
         """
-        APIレスポンスからカテゴリDFを構築する（大・中・小すべて含む）
+        食材からレシピ検索を行う
+        """
 
-        Args:
-            json_data (dict): 検索結果のレスポンスデータ
+        # APIとAffiliateIDの設定を検証する
+        if not self.validate_rakuten_settings(): return []
 
-        Returns:
-            pd.DataFrame: 整形されたデータフレーム
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            # 食材とカテゴリIDをマッピングする
+            category_id = await self.map_category_id_from_ingredient(ingredient, client)
+
+            params: dict = {
+                "applicationId": self.settings.rakuten_app_id,
+                "categoryId": category_id,
+                "format": "json",
+            }
+
+            params["affiliateId"] = self.settings.rakuten_affiliate_id
+
+            response = await client.get(CATEGORY_RANKING_URL, params=params)
+            response.raise_for_status()
+            payload = response.json()
+
+        # レシピの結果を整形する
+        result: list[RakutenRecipeSearchResponse] = []
+        for item in payload.get("result", [])[:limit]:
+            result.append(
+                RakutenRecipeSearchResponse(
+                    recipe_id=str(item.get("recipeId", "")),
+                    title=item.get("recipeTitle", ""),
+                    description=item.get("recipeDescription", ""),
+                    url=item.get("recipeUrl", ""),
+                    image_url=item.get("foodImageUrl"),
+                    materials=item.get("recipeMaterial", []),
+                )
+            )
+        return result
+
+
+    async def map_category_id_from_ingredient(self, ingredient: str, client: httpx.AsyncClient) -> str | None:
+        """
+        食材名からカテゴリIDをマッピングさせる
+        """
+        df = await self.fetch_category_dataframe(client) # カテゴリ一覧を取得する
+        matched = df[df["categoryName"].str.contains(ingredient, na=False)]
+        if matched.empty:
+            self.logger.warning(f"カテゴリが見つかりませんでした: {ingredient}")
+            return None
+
+        # カテゴリIDを返す
+        return str(matched.iloc[0]["categoryId"])
+
+
+    async def fetch_category_dataframe(self, client: httpx.AsyncClient) -> pd.DataFrame:
+        """
+        カテゴリ一覧を取得してデータフレームにキャッシュする
+        """
+        if RakutenRecipeService._category_df is not None:
+            return RakutenRecipeService._category_df
+
+        # カテゴリ一覧を取得する
+        params: dict = {
+            "applicationId": self.settings.rakuten_app_id,
+            "format": "json",
+        }
+        response = await client.get(CATEGORY_LIST_URL, params=params)
+        response.raise_for_status() # レスポンスを検証する
+        json_data = response.json() # レスポンスをJSON形式に変換する
+        df = self.build_category_dataframe(json_data)
+        RakutenRecipeService._category_df = df
+        return df
+
+
+    def build_category_dataframe(self, json_data: dict) -> pd.DataFrame:
+        """
+        APIレスポンスからカテゴリデータフレームを構築する（大・中・小すべて含む）
         """
         parent_dict: dict[str, str] = {}
         rows: list[dict] = []
@@ -70,100 +137,17 @@ class RakutenRecipeService:
         return pd.DataFrame(rows, columns=["category1", "category2", "category3", "categoryId", "categoryName"])
 
 
-    async def fetch_category_df(self, client: httpx.AsyncClient) -> pd.DataFrame:
+    def validate_rakuten_settings(self) -> bool:
         """
-        カテゴリ一覧を取得してDFにキャッシュする
-
-        Args:
-            client (httpx.AsyncClient): HTTPクライアント
-
-        Returns:
-            pd.DataFrame: 整形されたデータフレーム
-        """
-        if RakutenRecipeService._category_df is not None:
-            return RakutenRecipeService._category_df
-
-        # リクエストを投げてレスポンスを受け取る
-        params = {
-            "applicationId": self.settings.rakuten_app_id,
-            "format": "json"
-        }
-        response = await client.get(CATEGORY_LIST_URL, params=params)
-        response.raise_for_status()
-
-        # レスポンスをもとにデータフレームを整形する
-        df = self.build_category_df(response.json())
-        RakutenRecipeService._category_df = df
-        self.logger.info(f"カテゴリDF構築完了: {len(df)}件")
-        return df
-
-
-    async def map_category_id(self, ingredient: str, client: httpx.AsyncClient) -> str | None:
-        """
-        食材名からカテゴリIDをマッピングさせる
-
-        Args:
-            ingredient (str): 食材名
-            client (httpx.AsyncClient): クライアント
-
-        Returns:
-            str | None: _description_
-        """
-        df = await self.fetch_category_df(client)
-        matched = df[df["categoryName"].str.contains(ingredient, na=False)]
-        if matched.empty:
-            self.logger.warning(f"カテゴリが見つかりませんでした: {ingredient}")
-            return None
-        return str(matched.iloc[0]["categoryId"])
-
-
-    async def search_for_recipes(self, ingredient: str, limit: int = 10) -> list[RakutenRecipeSearchResponse]:
-        """
-        食材からレシピ検索を行う
-
-        Args:
-            ingredient (str): _description_
-            limit (int, optional): _description_. Defaults to 10.
-
-        Returns:
-            list[RakutenRecipeSearchResponse]: _description_
+        APIとAffiliateIDの設定を検証する
         """
         if not self.settings.rakuten_app_id:
             self.logger.error("楽天ApplicationAPIが空です")
-            return []
+            return False
 
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            # 食材とカテゴリIDをマッピングする
-            category_id = await self.map_category_id(ingredient, client)
-            if category_id is None:
-                self.logger.warning("食材に対応するカテゴリIDがありませんでした")
-                return []
+        if not self.settings.rakuten_affiliate_id:
+            self.logger.error("楽天AffiliateIDが空です")
+            return False
 
-            params: dict = {
-                "applicationId": self.settings.rakuten_app_id,
-                "categoryId": category_id,
-                "format": "json",
-            }
-            if self.settings.rakuten_affiliate_id is None:
-                self.logger.error("楽天AffiliateIDがありません")
-                return []
-            params["affiliateId"] = self.settings.rakuten_affiliate_id
-
-            response = await client.get(CATEGORY_RANKING_URL, params=params)
-            response.raise_for_status()
-            payload = response.json()
-
-        # レシピの結果を整形する
-        result: list[RakutenRecipeSearchResponse] = []
-        for item in payload.get("result", [])[:limit]:
-            result.append(
-                RakutenRecipeSearchResponse(
-                    recipe_id=str(item.get("recipeId", "")),
-                    title=item.get("recipeTitle", ""),
-                    description=item.get("recipeDescription", ""),
-                    url=item.get("recipeUrl", ""),
-                    image_url=item.get("foodImageUrl"),
-                    materials=item.get("recipeMaterial", []),
-                )
-            )
-        return result
+        self.logger.info("楽天設定が正常に設定されています")
+        return True

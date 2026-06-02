@@ -24,10 +24,10 @@ FastAPI で構築した cooking-web 向けバックエンド
 ```
 cooking-web-backend
 ├── app # app
-│   ├── api      # HTTPエンドポイント層でAPIの定義
+│   ├── api      # HTTPエンドポイント層でAPIの定義（controller層に当たる）
 │   ├── core     # 共通設定・基盤（.envの読み込みを管理）
 │   ├── db       # DB接続と初期化
-│   ├── models   # DBテーブルの定義
+│   ├── models   # DBテーブルの定義（model層に当たる）
 │   ├── schemas  # リクエスト・レスポンスの型の定義
 │   └── services # 外部APIや業務ロジックの定義
 └── test

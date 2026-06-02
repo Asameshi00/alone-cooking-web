@@ -5,19 +5,30 @@ import httpx
 
 from app.core.config import get_settings
 from app.schemas.recipe import YouTubeVideoResponse
+from app.services.logger import get_logger
 
 YOUTUBE_SEARCH_URL = "https://www.googleapis.com/youtube/v3/search"
 
 
 # YouTube Data API v3 を使用してレシピ動画を検索するサービス
 class YouTubeRecipeService:
+
     def __init__(self) -> None:
-        self.settings = get_settings()
+        """ コンストラクタ """
+        self.settings = get_settings() # 設定を取得する
+        self.logger = get_logger(__name__) # ログを取得する
+        self.client = httpx.AsyncClient(timeout=15.0) # HTTPクライアントを作成する
 
-    async def search(self, ingredient: str, limit: int = 5) -> list[YouTubeVideoResponse]:
-        if not self.settings.youtube_api_key:
-            return []
 
+    async def search_for_recipes(self, ingredient: str, limit: int = 5) -> list[YouTubeVideoResponse]:
+        """
+        YouTube Data API v3 を使用して食材からレシピ動画を検索する
+        """
+
+        # APIキーの設定を検証する
+        if not self.validate_youtube_settings(): return []
+
+        # パラメータを設定する
         params = {
             "key": self.settings.youtube_api_key,
             "q": f"{ingredient} レシピ",
@@ -26,11 +37,13 @@ class YouTubeRecipeService:
             "maxResults": limit,
         }
 
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        # HTTPクライアントを作成する
+        async with self.client as client:
             response = await client.get(YOUTUBE_SEARCH_URL, params=params)
             response.raise_for_status()
             payload = response.json()
 
+        # レシピ動画の結果を整形する
         result: list[YouTubeVideoResponse] = []
         for item in payload.get("items", []):
             video_id = item.get("id", {}).get("videoId", "")
@@ -45,3 +58,15 @@ class YouTubeRecipeService:
                 )
             )
         return result
+
+
+    def validate_youtube_settings(self) -> bool:
+        """
+        APIキーの設定を検証する
+        """
+        if not self.settings.youtube_api_key:
+            self.logger.error("YouTube Data API v3 のキーが空です")
+            return False
+
+        self.logger.info("YouTube Data API v3 の設定が正常に設定されています")
+        return True

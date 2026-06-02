@@ -11,11 +11,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """
     設定クラス
-
-    Args:
-        BaseSettings (_type_): 基底クラス
     """
-    
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     app_name: str = "Cooking Web Backend" # アプリケーション名

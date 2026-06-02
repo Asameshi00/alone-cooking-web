@@ -15,7 +15,7 @@ youtube_service = YouTubeRecipeService()
 
 
 # TODO: _searchメソッドをserviceに移動する
-async def _search(ingredient: str, limit: int) -> RecipeSearchResult:
+async def _search_recipes(ingredient: str, limit: int) -> RecipeSearchResult:
     """
     食材から限られた件数レシピ検索をする
     Args:
@@ -27,8 +27,9 @@ async def _search(ingredient: str, limit: int) -> RecipeSearchResult:
     """
     rakuten_recipes, youtube_videos = await asyncio.gather(
         rakuten_service.search_for_recipes(ingredient=ingredient, limit=limit),
-        youtube_service.search(ingredient=ingredient, limit=limit),
+        youtube_service.search_for_recipes(ingredient=ingredient, limit=limit),
     )
+
     return RecipeSearchResult(
         ingredient=ingredient,
         rakuten_recipes=rakuten_recipes,
@@ -38,8 +39,8 @@ async def _search(ingredient: str, limit: int) -> RecipeSearchResult:
 
 # GETエンドポイント: クエリパラメータで食材を指定してレシピを検索する
 @router.get("/search", response_model=RecipeSearchResult)
-async def search_recipe(
+async def search_recipes(
     ingredient: str = Query(..., min_length=1, description="検索したい食材名"),
     limit: int = Query(10, ge=1, le=30),
 ) -> RecipeSearchResult:
-    return await _search(ingredient=ingredient, limit=limit)
+    return await _search_recipes(ingredient=ingredient, limit=limit)
