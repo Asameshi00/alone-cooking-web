@@ -24,10 +24,10 @@ FastAPI で構築した cooking-web 向けバックエンド
 ```
 cooking-web-backend
 ├── app # app
-│   ├── api      # HTTPエンドポイント層でAPIの定義
+│   ├── api      # HTTPエンドポイント層でAPIの定義（controller層に当たる）
 │   ├── core     # 共通設定・基盤（.envの読み込みを管理）
 │   ├── db       # DB接続と初期化
-│   ├── models   # DBテーブルの定義
+│   ├── models   # DBテーブルの定義（model層に当たる）
 │   ├── schemas  # リクエスト・レスポンスの型の定義
 │   └── services # 外部APIや業務ロジックの定義
 └── test
@@ -54,13 +54,13 @@ cooking-web-backend
    - GET method: ヘルスチェック
 - `GET /api/v1/recipes/search?ingredient=卵&limit=10`
    - GET method: 食材をもとにレシピ検索
-- `POST /api/v1/ai/suggest`
-   - POST method: AIによるレシピの提案
+- `GET /api/v1/recipes/favorites`
+   - GET method: お気に入りレシピを取得する
+- `POST /api/v1/recipes/favorites`
+   - POST method: お気に入りのレシピを作成する
 - `GET /api/v1/inventory`
    - GET method: 在庫を取得する
 - `POST /api/v1/inventory`
    - POST method: 在庫を作成する
-- `GET /api/v1/favorites`
-   - GET method: お気に入りレシピを取得する
-- `POST /api/v1/favorites`
-   - POST method: お気に入りのレシピを作成する
+- `DELETE /api/v1/inventory`
+   - DELETE method: 在庫を削除する

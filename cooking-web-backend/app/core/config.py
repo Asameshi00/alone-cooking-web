@@ -1,13 +1,18 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
 from functools import lru_cache
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# 設定ファイル
+
 class Settings(BaseSettings):
+    """
+    設定クラス
+    """
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     app_name: str = "Cooking Web Backend" # アプリケーション名
@@ -20,17 +25,12 @@ class Settings(BaseSettings):
 
     rakuten_app_id: str | None = None # 楽天レシピAPIのアプリID
     rakuten_affiliate_id: str | None = None # 楽天レシピAPIのアフィリエイトID
-    rakuten_category_id: str = "14-121" # 楽天レシピAPIのカテゴリID
 
-    ai_provider: str = "local" # AIのプロバイダ
-    openai_api_key: str | None = None # OpenAIのAPIキー
-    openai_model: str = "gpt-4o-mini" # OpenAIのモデル
-    gemini_api_key: str | None = None # GeminiのAPIキー
-    gemini_model: str = "gemini-1.5-flash" # Geminiのモデル
+    youtube_api_key: str | None = None # YouTube Data API キー
 
     @field_validator("allowed_origins", mode="before")
     @classmethod
-    def parse_origins(cls, value: str | list[str]) -> list[str]:
+    def parse_allowed_origins(cls, value: str | list[str]) -> list[str]:
         if isinstance(value, list):
             return value
         return [v.strip() for v in value.split(",") if v.strip()]
