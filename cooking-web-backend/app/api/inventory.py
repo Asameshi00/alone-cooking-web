@@ -2,48 +2,28 @@
 # -*- coding: utf-8 -*-
 
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import Select, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.api.deps import db_session_dep
-from app.models.inventory_model import InventoryItem
+from fastapi import APIRouter, Query
 from app.schemas.inventory import InventoryCreate, InventoryResponse
+from app.services.inventory.inventory_service import InventoryService
+
+inventory_service = InventoryService()
 
 router = APIRouter(prefix="/inventory", tags=["inventory"])
 
 # 在庫を取得するエンドポイント
 @router.get("", response_model=list[InventoryResponse])
-async def list_inventory(
-    user_id: int = Query(..., ge=1),
-    session: AsyncSession = Depends(db_session_dep),
-) -> list[InventoryResponse]:
-    stmt: Select[tuple[InventoryItem]] = select(InventoryItem).where(InventoryItem.user_id == user_id)
-    rows = (await session.execute(stmt)).scalars().all()
-    return [InventoryResponse.model_validate(row) for row in rows]
+async def list_inventory(user_id: int = Query(..., ge=1)) -> list[InventoryResponse]:
+    return [InventoryResponse.model_validate(item) for item in inventory_service.list_inventory(user_id)]
 
 
-# 在庫を作成するエンドポイント
+# 食材を在庫に追加するエンドポイント
 @router.post("", response_model=InventoryResponse)
-async def create_inventory(
-    payload: InventoryCreate,
-    session: AsyncSession = Depends(db_session_dep),
-) -> InventoryResponse:
-    item = InventoryItem(**payload.model_dump())
-    session.add(item)
-    await session.commit()
-    await session.refresh(item)
+async def add_inventory(payload: InventoryCreate) -> InventoryResponse:
+    item = inventory_service.add_inventory(payload.user_id, payload.ingredient_name, payload.quantity, payload.unit)
     return InventoryResponse.model_validate(item)
 
 
 # 在庫を削除するエンドポイント
-@router.delete("/{item_id}", status_code=204)
-async def delete_inventory(
-    item_id: int,
-    session: AsyncSession = Depends(db_session_dep),
-) -> None:
-    item = await session.get(InventoryItem, item_id)
-    if item is None:
-        raise HTTPException(status_code=404, detail="指定された在庫が見つかりません")
-    await session.delete(item)
-    await session.commit()
+@router.delete("/{inventory_id}", status_code=204)
+async def delete_inventory(inventory_id: int) -> None:
+    inventory_service.delete_inventory(inventory_id)
