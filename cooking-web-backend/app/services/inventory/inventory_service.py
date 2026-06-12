@@ -10,7 +10,7 @@ from app.schemas.inventory import InventoryCreate, InventoryResponse
 
 
 class InventoryService:
-    """ 在庫サービス """
+    """ 在庫サービスクラス """
 
     def __init__(self) -> None:
         """ コンストラクタ """
