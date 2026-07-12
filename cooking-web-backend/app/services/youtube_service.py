@@ -17,16 +17,16 @@ class YouTubeRecipeService:
         """ コンストラクタ """
         self.settings = get_settings() # 設定を取得する
         self.logger = get_logger(__name__) # ログを取得する
-        self.client = httpx.AsyncClient(timeout=15.0) # HTTPクライアントを作成する
 
 
-    async def search_for_recipes(self, ingredient: str, limit: int = 5) -> list[YouTubeVideoResponse]:
+    async def search_for_recipes_by_youtube(self, ingredient: str, limit: int = 5) -> list[YouTubeVideoResponse]:
         """
         YouTube Data API v3 を使用して食材からレシピ動画を検索する
         """
 
         # APIキーの設定を検証する
-        if not self.validate_youtube_settings(): return []
+        if not self.validate_youtube_settings():
+            return []
 
         # パラメータを設定する
         params = {
@@ -37,8 +37,7 @@ class YouTubeRecipeService:
             "maxResults": limit,
         }
 
-        # HTTPクライアントを作成する
-        async with self.client as client:
+        async with httpx.AsyncClient(timeout=15.0) as client:
             response = await client.get(YOUTUBE_SEARCH_URL, params=params)
             response.raise_for_status()
             payload = response.json()
