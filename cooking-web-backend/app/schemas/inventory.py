@@ -6,7 +6,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 from app.schemas.common import ORMBase
 
-# 在庫を作成するリクエスト
+# 在庫のスキーマ
 class InventoryCreate(BaseModel):
     user_id: int = Field(..., ge=1) # ユーザーID
     ingredient_name: str = Field(..., min_length=1, max_length=120) # 食材名

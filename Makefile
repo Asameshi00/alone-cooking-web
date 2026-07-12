@@ -10,6 +10,8 @@ help:
 	@echo "  build            : フロントエンドをビルド"
 	@echo "  test             : フロントエンドのテストを実行"
 	@echo "  lint             : フロントとバックエンドのlintを実行"
+	@echo "  lint-frontend    : フロントエンドのリント"
+	@echo "  lint-backend     : バックエンドのリント"
 	@echo "  install          : フロント/バックエンドの依存関係をインストール"
 	@echo "  install-frontend : フロントエンド依存をインストール"
 	@echo "  install-backend  : バックエンド依存をインストール(uv sync)"
@@ -108,12 +110,17 @@ lint:
 	cd $(BACKEND_DIR) && uv run ruff check app
 	@echo "Lint complete."
 
-.PHONY: list
-list:
-	@echo "=== フロントエンド依存(直接) ==="
-	cd $(FRONTEND_DIR) && npm list --depth=0
-	@echo "=== フロントエンド依存(全体) ==="
-	cd $(FRONTEND_DIR) && npm list
+.PHONY: lint-frontend
+lint-frontend:
+	@echo "=== フロントエンド lint ==="
+	cd $(FRONTEND_DIR) && npm run lint
+	@echo "Lint complete."
+
+.PHONY: lint-backend
+lint-backend:
+	@echo "=== バックエンド lint ==="
+	cd $(BACKEND_DIR) && uv run ruff check app
+	@echo "Lint complete."
 
 .PHONY: check-old
 check-old:

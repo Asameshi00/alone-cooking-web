@@ -19,13 +19,8 @@ class RakutenRecipeSearchResponse(BaseModel):
     materials: list[str] = Field(default_factory=list) # レシピの材料
 
 
+# YouTube動画1件のレスポンスのスキーマ
 class YouTubeVideoResponse(BaseModel):
-    """
-    YouTube動画1件のレスポンスのスキーマ
-
-    Args:
-        BaseModel (_type_): 基底クラス
-    """
     video_id: str # 動画ID
     title: str # 動画タイトル
     description: str # 動画の説明
@@ -33,13 +28,13 @@ class YouTubeVideoResponse(BaseModel):
     thumbnail_url: str | None = None # サムネイルURL
 
 
+# 統合した検索結果のスキーマ
 class RecipeSearchResult(BaseModel):
-    """
-    統合した検索結果のスキーマ
-
-    Args:
-        BaseModel (_type_): 基底クラス
-    """
     ingredient: str # 検索した食材名
     rakuten_recipes: list[RakutenRecipeSearchResponse] # 楽天レシピ検索結果
     youtube_videos: list[YouTubeVideoResponse] # YouTube動画検索結果
+
+
+class BoardRecipeSearchResponse(BaseModel):
+    """ まな板の食材一覧からのレシピ検索レスポンス """
+    results: list[RecipeSearchResult]

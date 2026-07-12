@@ -20,13 +20,14 @@ class RakutenRecipeService:
         self.logger = get_logger(__name__) # ログを取得する
         self.settings = get_settings() # 設定を取得する
 
-    async def search_for_recipes(self, ingredient: str, limit: int = 10) -> list[RakutenRecipeSearchResponse]:
+    async def search_for_recipes_by_rakuten(self, ingredient: str, limit: int = 10) -> list[RakutenRecipeSearchResponse]:
         """
         食材からレシピ検索を行う
         """
 
         # APIとAffiliateIDの設定を検証する
-        if not self.validate_rakuten_settings(): return []
+        if not self.validate_rakuten_settings():
+            return []
 
         async with httpx.AsyncClient(timeout=15.0) as client:
             # 食材とカテゴリIDをマッピングする
@@ -101,7 +102,7 @@ class RakutenRecipeService:
         parent_dict: dict[str, str] = {}
         rows: list[dict] = []
 
-        # 小カテゴリ
+        # 大カテゴリ
         for cat in json_data["result"]["large"]:
             rows.append({
                 "category1": str(cat["categoryId"]),
@@ -122,7 +123,7 @@ class RakutenRecipeService:
                 "categoryName": cat["categoryName"],
             })
 
-        # 大カテゴリ
+        # 小カテゴリ
         for cat in json_data["result"]["small"]:
             parent_id = str(cat["parentCategoryId"])
             grandparent_id = parent_dict.get(parent_id, "")
