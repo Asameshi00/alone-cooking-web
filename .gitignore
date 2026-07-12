@@ -20,7 +20,12 @@ cooking-web-backend/.ruff_cache/
 cooking-web-backend/.mypy_cache/
 cooking-web-backend/app.db
 
+### pgadmin ###
+pgadmin/pgpass
+pgadmin/servers.json
+
 ### OS / Editor ###
 .DS_Store
 .idea/
 .vscode/
+.claude/

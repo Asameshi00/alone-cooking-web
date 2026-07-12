@@ -1,0 +1,64 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: cooking-web-db
+    environment:
+      POSTGRES_USER: cooking
+      POSTGRES_PASSWORD: cooking
+      POSTGRES_DB: cooking
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cooking -d cooking"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  backend:
+    build:
+      context: ./cooking-web-backend
+      dockerfile: Dockerfile
+    container_name: cooking-web-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./cooking-web-backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://cooking:cooking@db:5432/cooking
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./cooking-web-backend/app:/app/app:ro
+  frontend:
+    build:
+      context: ./cooking-web-frontend
+      dockerfile: Dockerfile
+    container_name: cooking-web-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      HOST: 0.0.0.0
+      WATCHPACK_POLLING: "true"
+      REACT_APP_API_BASE_URL: http://localhost:8000/api/v1
+    depends_on:
+      - backend
+    volumes:
+      - ./cooking-web-frontend/src:/app/src
+      - ./cooking-web-frontend/public:/app/public
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: cooking-web-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    volumes:
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - ./pgadmin/pgpass:/pgpass:ro
+volumes:
+  pgdata: {}

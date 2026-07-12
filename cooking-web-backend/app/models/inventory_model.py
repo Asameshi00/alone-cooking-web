@@ -1,11 +1,13 @@
-from datetime import datetime
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+
+from datetime import datetime
 from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from app.db.base import Base
 
-
+# 在庫モデル
 class InventoryItem(Base):
     __tablename__ = "inventory_items"
 
