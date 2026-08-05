@@ -6,14 +6,14 @@ import React from 'react';
 import { Ingredient } from '../types/ingredient';
 
 /** 食材リストのインタフェース **/
-interface IngredientListProps {
+interface InventoryListProps {
     ingredients: Ingredient[];
     removeIngredient: (ingredient: string) => void;
 }
 
-const IngredientList: React.FC<IngredientListProps> = ({ ingredients, removeIngredient }) => {
+const InventoryList: React.FC<InventoryListProps> = ({ ingredients, removeIngredient }) => {
     if (ingredients.length === 0) {
-        return <p className="text-sm text-gray-500">まだ食材が追加されていません。</p>;
+        return <p className="text-sm text-gray-500">まだ在庫に食材が追加されていません。</p>;
     }
 
     return (
@@ -34,4 +34,4 @@ const IngredientList: React.FC<IngredientListProps> = ({ ingredients, removeIngr
     );
 };
 
-export default IngredientList;
+export default InventoryList;

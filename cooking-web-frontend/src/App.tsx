@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import IngredientForm from "./components/IngredientForm";
-import IngredientList from "./components/IngredientList";
+import IngredientList from "./components/InventoryList";
 import { Ingredient, Quantity } from "./types/ingredient";
 import Searcher from "./components/Searcher";
 
