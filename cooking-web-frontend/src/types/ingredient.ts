@@ -1,10 +1,6 @@
-/** 食品の量の型定義 **/
-type Quantity = '多' | '中' | '少' ;
-
 /** 食材の型定義 **/
 interface Ingredient {
     name: string;
-    quantity: Quantity;
 }
 
 /** Webサイトの状態管理 **/
@@ -21,4 +17,4 @@ type Action =
     | { type: 'SET_SEARCH_QUERY'; payload: string }
     | { type: 'SEARCH_RECIPES' };
 
-export type { Quantity, Ingredient, State, Action };
+export type { Ingredient, State, Action };
