@@ -30,10 +30,10 @@ const Searcher: React.FC<SearcherProps> = ({ ingredients }) => {
             <div className="flex gap-2">
                 <button
                     onClick={handleSearch}
-                    className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    disabled={loading}
+                    className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={loading || ingredients.length === 0}
                 >
-                    {loading ? "検索中..." : "レシピ検索"}
+                    {loading ? "検索中..." : "まな板の食材で検索"}
                 </button>
             </div>
 
