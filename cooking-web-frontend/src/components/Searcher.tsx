@@ -1,6 +1,6 @@
 import React from "react";
-import { useAiSuggestion } from "../hooks/useAiSuggestion";
-import { useRakutenAPI } from "../hooks/useRakuten";
+import { useNavigate } from "react-router-dom";
+import { useBoardSearch } from "../hooks/useBoardSearch";
 import { Ingredient } from "../types/ingredient";
 
 /** 検索のプロパティ **/
@@ -9,20 +9,16 @@ interface SearcherProps {
 }
 
 const Searcher: React.FC<SearcherProps> = ({ ingredients }) => {
-    const { recipes, loading, error, fetchRecipes } = useRakutenAPI();
-    const {
-        suggestion,
-        loading: aiLoading,
-        error: aiError,
-        fetchSuggestion
-    } = useAiSuggestion();
+    const { loading, error, searchRecipes } = useBoardSearch();
+    const navigate = useNavigate();
 
-    // 検索ボタンを押したときの処理
+    // 検索ボタンを押したときの処理。検索後は結果画面へ遷移する
     const handleSearch = async () => {
-        const ingredient = ingredients.map(ingredient => ingredient.name);
-        await fetchRecipes(ingredient, {
-            hits: 20,
-        })
+        const ingredientNames = ingredients.map(ingredient => ingredient.name);
+        const results = await searchRecipes(ingredientNames);
+        if (results.length > 0) {
+            navigate("/result", { state: { results } });
+        }
     };
 
     return (
@@ -38,18 +34,6 @@ const Searcher: React.FC<SearcherProps> = ({ ingredients }) => {
             </div>
 
             {error && <div className="mt-2 text-red-500">エラーが発生しました: {error}</div>}
-
-            {recipes.map((recipe, index) => (
-                <div key={recipe.recipeId || index} className="mt-3 rounded-md border bg-gray-50 p-3">
-                    <h3 className="font-semibold">{recipe.recipeTitle}</h3>
-                    <p className="text-sm text-gray-600">{recipe.recipeDescription}</p>
-                    <img src={recipe.foodImageUrl} alt={recipe.recipeTitle} className="mt-2 h-36 w-full object-cover rounded" />
-                    <a href={recipe.recipeUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-blue-600 underline">
-                        レシピを見る
-                    </a>
-                </div>
-            ))}
-
         </div>
     );
 }

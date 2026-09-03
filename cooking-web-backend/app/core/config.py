@@ -28,6 +28,11 @@ class Settings(BaseSettings):
 
     youtube_api_key: str | None = None # YouTube Data API キー
 
+    # エンドポイントのURL
+    rakuten_category_list_url: str = "https://app.rakuten.co.jp/services/api/Recipe/CategoryList/20170426"
+    rakuten_category_ranking_url: str = "https://app.rakuten.co.jp/services/api/Recipe/CategoryRanking/20170426"
+    youtube_search_url: str = "https://www.googleapis.com/youtube/v3/search"
+
     @field_validator("allowed_origins", mode="before")
     @classmethod
     def parse_allowed_origins(cls, value: str | list[str]) -> list[str]:
