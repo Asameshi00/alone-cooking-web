@@ -7,12 +7,11 @@ from app.core.config import get_settings
 from app.schemas.recipe import YouTubeVideoResponse
 from app.services.logger import get_logger
 
-YOUTUBE_SEARCH_URL = "https://www.googleapis.com/youtube/v3/search"
+YOUTUBE_SEARCH_URL = get_settings().youtube_search_url
 
 
 # YouTube Data API v3 を使用してレシピ動画を検索するサービス
 class YouTubeRecipeService:
-
     def __init__(self) -> None:
         """ コンストラクタ """
         self.settings = get_settings() # 設定を取得する
@@ -37,10 +36,14 @@ class YouTubeRecipeService:
             "maxResults": limit,
         }
 
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            response = await client.get(YOUTUBE_SEARCH_URL, params=params)
-            response.raise_for_status()
-            payload = response.json()
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                response = await client.get(YOUTUBE_SEARCH_URL, params=params)
+                response.raise_for_status()
+                payload = response.json()
+        except httpx.HTTPError as exc:
+            self.logger.error(f"YouTube動画検索エラー: {exc}")
+            return []
 
         # レシピ動画の結果を整形する
         result: list[YouTubeVideoResponse] = []
