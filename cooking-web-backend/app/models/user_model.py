@@ -19,4 +19,4 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
     inventories = relationship("InventoryItem", back_populates="user", cascade="all,delete")
-    favorites = relationship("FavoriteRecipe", back_populates="user", cascade="all,delete")
+    favorites = relationship("Favorite", back_populates="user", cascade="all,delete")
