@@ -2,9 +2,12 @@
  * まな板の食材で検索したレシピ・動画の一覧を表示する画面
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { IngredientSearchResult } from '../../types/recipe';
+import { useFavorites } from '../../hooks/useFavorites';
+import { DEMO_USER_ID } from '../../constants/user';
+import FavoriteButton from '../../components/FavoriteButton';
 
 interface ResultLocationState {
     results?: IngredientSearchResult[];
@@ -13,6 +16,28 @@ interface ResultLocationState {
 const Result: React.FC = () => {
     const location = useLocation();
     const results = (location.state as ResultLocationState | null)?.results ?? [];
+
+    const { favorites, fetchFavorites } = useFavorites();
+    const [favoriteKeys, setFavoriteKeys] = useState<Set<string>>(new Set());
+
+    // お気に入りを取得
+    useEffect(() => {
+        fetchFavorites(DEMO_USER_ID);
+    }, [fetchFavorites]);
+
+    // お気に入りのキーを更新
+    useEffect(() => {
+        setFavoriteKeys(new Set(favorites.map((f) => `${f.kind}:${f.itemId}`)));
+    }, [favorites]);
+
+    // 一覧のキー集合をその場で更新する（APIへの登録/解除はFavoriteButton側で完結している）
+    const toggleKey = (key: string, nowFavorite: boolean) => {
+        setFavoriteKeys((prev) => {
+            const next = new Set(prev);
+            if (nowFavorite) next.add(key); else next.delete(key);
+            return next;
+        });
+    };
 
     if (results.length === 0) {
         return (
@@ -32,6 +57,9 @@ const Result: React.FC = () => {
                 <Link to="/" className="mb-4 inline-block text-blue-600 underline">
                     まな板に戻る
                 </Link>
+                <Link to="/favorites" className="mb-4 ml-4 inline-block text-blue-600 underline">
+                    お気に入りを見る
+                </Link>
 
                 {results.map((result) => (
                     <section key={result.ingredient} className="mb-6">
@@ -43,7 +71,22 @@ const Result: React.FC = () => {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {result.rakutenRecipes.map((recipe) => (
                                         <div key={recipe.recipeId} className="rounded-md border bg-gray-50 p-3">
-                                            <h4 className="font-semibold">{recipe.title}</h4>
+                                            <div className="flex items-start justify-between gap-2">
+                                                <h4 className="font-semibold">{recipe.title}</h4>
+                                                <FavoriteButton
+                                                    item={{
+                                                        kind: "recipe",
+                                                        item_id: recipe.recipeId,
+                                                        title: recipe.title,
+                                                        description: recipe.description,
+                                                        url: recipe.url,
+                                                        image_url: recipe.imageUrl,
+                                                    }}
+                                                    userId={DEMO_USER_ID}
+                                                    isFavorite={favoriteKeys.has(`recipe:${recipe.recipeId}`)}
+                                                    onChange={(nowFavorite) => toggleKey(`recipe:${recipe.recipeId}`, nowFavorite)}
+                                                />
+                                            </div>
                                             <p className="text-sm text-gray-600">{recipe.description}</p>
                                             {recipe.imageUrl && (
                                                 <img
@@ -72,7 +115,22 @@ const Result: React.FC = () => {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {result.youtubeVideos.map((video) => (
                                         <div key={video.videoId} className="rounded-md border bg-gray-50 p-3">
-                                            <h4 className="font-semibold">{video.title}</h4>
+                                            <div className="flex items-start justify-between gap-2">
+                                                <h4 className="font-semibold">{video.title}</h4>
+                                                <FavoriteButton
+                                                    item={{
+                                                        kind: "video",
+                                                        item_id: video.videoId,
+                                                        title: video.title,
+                                                        description: video.description,
+                                                        url: video.url,
+                                                        image_url: video.thumbnailUrl,
+                                                    }}
+                                                    userId={DEMO_USER_ID}
+                                                    isFavorite={favoriteKeys.has(`video:${video.videoId}`)}
+                                                    onChange={(nowFavorite) => toggleKey(`video:${video.videoId}`, nowFavorite)}
+                                                />
+                                            </div>
                                             <p className="text-sm text-gray-600 line-clamp-2">{video.description}</p>
                                             {video.thumbnailUrl && (
                                                 <img
