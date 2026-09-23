@@ -28,7 +28,7 @@ export type FavoriteRaw = {
 };
 
 /** お気に入り登録リクエストに必要な最小限の情報（レシピ/動画カードから作る） **/
-export type FavoritableItem = {
+export type FavoriteItem = {
     kind: FavoriteKind;
     item_id: string;
     title: string;

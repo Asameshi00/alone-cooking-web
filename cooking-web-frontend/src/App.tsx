@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+import { Link } from "react-router-dom";
 import IngredientForm from "./components/IngredientForm";
 import IngredientList from "./components/InventoryList";
 import CuttingBoard from "./components/CuttingBoard";
@@ -54,6 +55,9 @@ const App: React.FC = () => {
                 <p className="mb-4 text-center text-sm text-gray-600">
                     食材からレシピ検索を行います
                 </p>
+                <Link to="/favorites" className="mb-4 inline-block text-blue-600 underline">
+                    お気に入りを見る
+                </Link>
                 <CuttingBoard
                     boardIngredients={boardIngredients}
                     addToBoard={addToBoard}

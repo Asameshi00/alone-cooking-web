@@ -4,6 +4,7 @@ import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import App from '../App';
 import Result from '../features/pages/Result';
+import Favorites from '../features/pages/Favorites';
 
 const AppRoutes: React.FC = () => {
     return (
@@ -11,6 +12,7 @@ const AppRoutes: React.FC = () => {
             <Routes>
                 <Route path="/" element={<App />} />
                 <Route path="/result" element={<Result />} />
+                <Route path="/favorites" element={<Favorites />} />
                 <Route path="/recipe" element={<div>レシピ一覧</div>} />
                 <Route path="/recipe/:id" element={<div>レシピ詳細</div>} />
             </Routes>
