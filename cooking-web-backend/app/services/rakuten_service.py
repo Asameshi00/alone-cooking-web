@@ -33,6 +33,8 @@ class RakutenRecipeService:
             async with httpx.AsyncClient(timeout=15.0) as client:
                 # 食材とカテゴリIDをマッピングする
                 category_id = await self.map_category_id_from_ingredient(ingredient, client)
+                if category_id is None:
+                  return []
 
                 params: dict = {
                     "applicationId": self.settings.rakuten_app_id,
@@ -85,7 +87,7 @@ class RakutenRecipeService:
         食材名からカテゴリIDをマッピングさせる
         """
         df = await self.fetch_category_dataframe(client) # カテゴリ一覧を取得する
-        matched = df[df["categoryName"].str.contains(ingredient, na=False)]
+        matched = df[df["categoryName"].str.contains(ingredient, na=False, regex=False)]
         if matched.empty:
             self.logger.warning(f"カテゴリが見つかりませんでした: {ingredient}")
             return None
