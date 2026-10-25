@@ -7,6 +7,7 @@ import pandas as pd
 from app.core.config import get_settings
 from app.schemas.recipe import RakutenRecipeSearchResponse
 from app.services.logger import get_logger
+from app.services.ingredient_category_map import find_category_keywords
 
 CATEGORY_LIST_URL = get_settings().rakuten_category_list_url
 CATEGORY_RANKING_URL = get_settings().rakuten_category_ranking_url
@@ -26,8 +27,7 @@ class RakutenRecipeService:
         """
 
         # APIとAffiliateIDの設定を検証する
-        if not self.validate_rakuten_settings():
-            return []
+        if not self.validate_rakuten_settings(): return []
 
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
@@ -87,6 +87,14 @@ class RakutenRecipeService:
         食材名からカテゴリIDをマッピングさせる
         """
         df = await self.fetch_category_dataframe(client) # カテゴリ一覧を取得する
+
+        # 対応表の候補キーワードを先頭から順に部分一致させる
+        for keyword in find_category_keywords(ingredient):
+            matched = df[df["categoryName"].str.contains(keyword, na=False, regex=False)]
+            if not matched.empty:
+                return str(matched.iloc[0]["categoryId"])
+
+        # 対応表でヒットしなければ、これまで通り生の食材名で部分一致を試す
         matched = df[df["categoryName"].str.contains(ingredient, na=False, regex=False)]
         if matched.empty:
             self.logger.warning(f"カテゴリが見つかりませんでした: {ingredient}")
