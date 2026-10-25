@@ -21,3 +21,6 @@ dev-dependencies = [
   "pytest>=8.2.0",
   "ruff>=0.5.0",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
